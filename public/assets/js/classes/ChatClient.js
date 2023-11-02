@@ -51,7 +51,7 @@ class ChatClient {
         });
 
         this.ws.on('chat message', (messages) => {
-            // console.log('Received messages:', messages);
+            console.log('Received messages:', messages);
             this.displayMessages(messages);
         });
 
@@ -64,7 +64,8 @@ class ChatClient {
     sendMessage() {
         const username = this.usernameInput.value;
         const message = this.messageInput.value;
-        const msgObj = {username, message};
+        const timestamp = Date.now();
+        const msgObj = {username, message, timestamp};
         this.ws.emit('chat message', msgObj);
         this.messageInput.value = '';
         localStorage.setItem('username', username);
@@ -89,10 +90,10 @@ class ChatClient {
         const isAtBottom = this.chatBox.scrollHeight - this.chatBox.clientHeight <= this.chatBox.scrollTop + 1;
 
         this.chatBox.innerHTML = '';
-        // console.log(messages);
+        console.log(messages);
         // Display each message
-        messages.forEach(({username, message, command}, index) => {
-            if (!username || !message) return;
+        messages.forEach(({username, message, command, timestamp, userId}, index) => {
+            if (!username || !message || !timestamp) return;
 
             const color = this.getColorFromUsername(username);
             const messageElement = document.createElement('div');
@@ -102,7 +103,7 @@ class ChatClient {
             // Create text nodes to prevent XSS
             const strongElement = document.createElement('strong');
             strongElement.style.color = color;
-            strongElement.textContent = `${username}:`;
+            strongElement.textContent = `[${timestamp}] ${username}:`;
             messageElement.appendChild(strongElement);
 
             const textNode = document.createTextNode(` ${message}`);
