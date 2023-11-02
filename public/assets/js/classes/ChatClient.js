@@ -8,12 +8,24 @@ class ChatClient {
         this.messageInput = document.getElementById('message');
         this.sendButton = document.getElementById('sendButton');
 
+        this.bCommandReceived = false;
+        this.updateTabTitle = this.updateTabTitle.bind(this);
+        this.flashScreen = this.flashScreen.bind(this);
+
+        this.triggerVibration = this.triggerVibration.bind(this);
+
         this.initUIHandlers();
         this.initWebSocket();
+
+        document.addEventListener('visibilitychange', () => {
+            this.updateTabTitle();
+        });
+        document.addEventListener('visibilitychange', this.updateTabTitle);
     }
 
     initUIHandlers() {
         this.usernameInput.value = localStorage.getItem('username') || '';
+
 
         this.sendButton.addEventListener('click', () => {
             this.sendMessage();
@@ -53,7 +65,7 @@ class ChatClient {
         const username = this.usernameInput.value;
         const message = this.messageInput.value;
         const msgObj = {username, message};
-        this.ws.emit('chat message', msgObj);  // Change this line
+        this.ws.emit('chat message', msgObj);
         this.messageInput.value = '';
         localStorage.setItem('username', username);
     }
@@ -98,8 +110,10 @@ class ChatClient {
 
             this.chatBox.appendChild(messageElement);
 
-            // If the message is a command, then add a special class
+            // If the message is a command, then handle client effects
             if (command === 'b' && index === messages.length - 1) {
+                this.bCommandReceived = true;
+                this.updateTabTitle();
                 this.flashScreen();
             }
             this.updateTabTitle();
@@ -112,12 +126,17 @@ class ChatClient {
     }
 
     updateTabTitle() {
-        if (document.hidden) {
-            // The tab is not active
-            document.title = String.fromCodePoint(0x273D) + String.fromCodePoint(0x273D) + ' New Message ' + String.fromCodePoint(0x273D) + String.fromCodePoint(0x273D);
+        if (document.hidden && this.bCommandReceived) {
+            // The tab is not active and a 'b' command has been received
+            document.title = String.fromCodePoint(0x273D)
+                + String.fromCodePoint(0x273D)
+                + ' New Message '
+                + String.fromCodePoint(0x273D)
+                + String.fromCodePoint(0x273D);
         } else {
-            // The tab is active
-            document.title = 'Rylekor TalkBox';
+            // The tab is active or no 'b' command has been received
+            document.title = 'Rylekor Talkbox';
+            this.bCommandReceived = false;  // Reset the flag when the tab is active
         }
     }
 
