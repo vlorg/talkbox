@@ -3,6 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 
 const BUFFER_CAPACITY = 100;
+const SERVER_PORT = 3000;
 
 const app = express();
 const server = http.createServer(app);
@@ -70,5 +71,5 @@ function handleCommand(socket, msg) {
 }
 
 server.listen(3000, () => {
-    console.log('listening on *:3000');
+    console.log('listening on *:' + SERVER_PORT);
 });
