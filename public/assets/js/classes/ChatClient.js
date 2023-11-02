@@ -90,12 +90,12 @@ class ChatClient {
         const isAtBottom = this.chatBox.scrollHeight - this.chatBox.clientHeight <= this.chatBox.scrollTop + 1;
 
         this.chatBox.innerHTML = '';
-        console.log(messages);
+        // console.log(messages);
         // Display each message
         messages.forEach(({username, message, command, timestamp, userId}, index) => {
             if (!username || !message || !timestamp) return;
 
-            const color = this.getColorFromUsername(username);
+            const color = this.getColorFromUsername(userId);
             const messageElement = document.createElement('div');
             messageElement.className = 'chat-message';
             messageElement.style.color = color;
