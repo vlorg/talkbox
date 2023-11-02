@@ -5,14 +5,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>Rylekor Talkbox</title>
-    <script type="application/ld+json">
-        {
-            "@context": "http://schema.org",
-            "@type": "WebSite",
-            "name": "Rylekor Talkbox",
-            "url": "https://rylekor.com/talkbox/"
-        }
-    </script>
     <script src="/talkbox/socket.io/socket.io.js"></script>
     <link rel="icon" type="image/png" sizes="1031x1020" href="assets/img/wpow_logo.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/darkly/bootstrap.min.css">
@@ -33,10 +25,6 @@
         <div class="col-12 col-lg-8" id="chatBox"
              style="border-style: none;background: rgba(255,255,255,0.07);"></div>
         <div class="col-12 col-lg-4">
-            <label for="message"></label><textarea class="border-info form-control mb-2" id="message" rows="4"
-                                                   placeholder="Type message here" name="message" spellcheck="true"
-                                                   required="" maxlength="200" minlength="1"
-                                                   style="background: rgb(0,0,0);color: var(--bs-body-color);"></textarea>
             <div class="input-group mb-2">
                 <label for="username"></label><input class="border-success form-control" type="text" id="username"
                                                      name="username" placeholder="Username" required="" minlength="1"
@@ -44,6 +32,10 @@
                                                      style="background: rgb(0,0,0);color: var(--bs-body-color);">
                 <button class="btn btn-primary" id="sendButton" type="button">Send</button>
             </div>
+            <label for="message"></label><textarea class="border-info form-control mb-2" id="message" rows="4"
+                                                   placeholder="Type message here" name="message" spellcheck="true"
+                                                   required="" maxlength="200" minlength="1"
+                                                   style="background: rgb(0,0,0);color: var(--bs-body-color);"></textarea>
         </div>
     </div>
     <div class="row">
