@@ -70,7 +70,7 @@ function handleCommand(socket, msg) {
     console.log({command, username, userId});
 
     switch (command) {
-        case 'c':
+        case '_': // clear the buffer
             const clearMessageObject = {
                 timestamp: timestamp,
                 username: username,
@@ -83,7 +83,7 @@ function handleCommand(socket, msg) {
             circularBuffer.fill(null);
             io.emit('chat message', circularBuffer);
             break;
-        case 'b':
+        case 'b': // send a bong
             const bongMessageObject = {
                 timestamp: timestamp,
                 username: username,
@@ -95,6 +95,19 @@ function handleCommand(socket, msg) {
             bufferIndex = (bufferIndex + 1) % BUFFER_CAPACITY;
             const recentMessages = circularBuffer.filter(msg => msg !== null);
             io.emit('chat message', recentMessages);
+            break;
+        case 'e':  // send an emote
+            const color = msg.message.slice(2);
+            const colorMessageObject = {
+                timestamp: timestamp,
+                username: username,
+                userId: userId,
+                message: `---> ${color}`,
+                command: 'c'
+            };
+            circularBuffer[bufferIndex] = colorMessageObject;
+            bufferIndex = (bufferIndex + 1) % BUFFER_CAPACITY;
+            io.emit('chat message', circularBuffer);
             break;
 
         default:
