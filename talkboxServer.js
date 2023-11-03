@@ -42,19 +42,20 @@ io.on('connection', (socket) => {
     socket.on('chat message', (msg) => {
         // Append userId to the message
         msg.userId = socket.userId;
-        console.log(msg);
+        console.log('Updated msg.userId:', msg);
         if (msg.message.startsWith('$')) {
             handleCommand(socket, msg);
         } else {
             // Store the message in the circular buffer
             circularBuffer[bufferIndex] = msg;
             bufferIndex = (bufferIndex + 1) % BUFFER_CAPACITY;
+            console.log('Updated circularBuffer:', circularBuffer);
 
             // Get all non-null messages from the circular buffer
             const recentMessages = circularBuffer.filter(msg => msg !== null);
+            console.log('Broadcasting recentMessages:', recentMessages);
 
             // Broadcast the entire chat log to all connected clients
-            // console.log('Broadcasting messages:', recentMessages);
             io.emit('chat message', recentMessages);
         }
     });
@@ -69,6 +70,19 @@ function handleCommand(socket, msg) {
     console.log({command, username, userId});
 
     switch (command) {
+        case 'c':
+            const clearMessageObject = {
+                timestamp: timestamp,
+                username: username,
+                userId: userId,
+                message: `---> CLEAR`,
+                command: 'c'
+            };
+            circularBuffer[bufferIndex] = clearMessageObject;
+            bufferIndex = (bufferIndex + 1) % BUFFER_CAPACITY;
+            circularBuffer.fill(null);
+            io.emit('chat message', circularBuffer);
+            break;
         case 'b':
             const bongMessageObject = {
                 timestamp: timestamp,
