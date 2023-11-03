@@ -23,24 +23,31 @@
     </div>
     <div class="row flex-lg-row">
         <div class="col-12 col-lg-8 py-3" id="chatBox"
-             style="border-style: none;background: rgba(255,255,255,0.07);"></div>
+             style="border-style: none;background: rgba(255,255,255,0.07);">
+        </div>
         <div class="col-12 col-lg-4">
             <div class="input-group mb-2">
-                <label for="username"></label><input class="border-success form-control" type="text" id="username"
-                                                     name="username" placeholder="Username" required="" minlength="1"
-                                                     maxlength="20"
-                                                     style="background: rgb(0,0,0);color: var(--bs-body-color);">
-                <button class="btn btn-primary" id="sendButton" type="button">Send</button>
+                <label for="username"></label>
+                <input class="border-success form-control" type="text" id="username"
+                       name="username" placeholder="Username" required="" minlength="1"
+                       maxlength="20"
+                       tabindex="0"
+                       style="background: rgb(0,0,0);color: var(--bs-body-color);">
+                <button class="btn btn-primary" id="sendButton" type="button" tabindex="-1">Send</button>
             </div>
-            <label for="message"></label><textarea class="border-info form-control mb-2" id="message" rows="4"
-                                                   placeholder="Type message here" name="message" spellcheck="true"
-                                                   required="" maxlength="200" minlength="1"
-                                                   style="background: rgb(0,0,0);color: var(--bs-body-color);"></textarea>
+            <label for="message"></label>
+            <textarea class="border-info form-control mb-2" id="message" rows="4"
+                      placeholder="Type message here" name="message" spellcheck="true"
+                      required="" maxlength="200" minlength="1"
+                      tabindex="0"
+                      style="background: rgb(0,0,0);color: var(--bs-body-color);"></textarea>
+            <canvas id="myCanvas" style="width: 100%; height: auto;"></canvas>
+
         </div>
     </div>
     <div class="row">
         <div class="col-12 p-0">
-            <canvas id="animationCanvas" style="width: 100%; height: auto;"></canvas>
+            <!-- Footer -->
         </div>
     </div>
 </div>
@@ -49,6 +56,7 @@
 <script src="assets/js/classes/Canvas.js"></script>
 <script src="assets/js/classes/ChatClient.js"></script>
 <script src="assets/js/main.js"></script>
+<!--<script src="assets/js/app/bounce.js"></script>-->
 </body>
 
 </html>
