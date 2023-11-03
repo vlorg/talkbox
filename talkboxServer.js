@@ -94,6 +94,8 @@ io.on('connection', (socket) => {
 
     socket.on('chat message', (msg) => {
         msg.userId = socket.userId;
+        console.log(msg);
+
         if (msg.message.startsWith('$')) {
             CommandHandler.handleCommand(socket, msg, messageBuffer);
         } else {
