@@ -7,6 +7,7 @@ class UIHandler {
         this.usernameInput = document.getElementById('username');
         this.messageInput = document.getElementById('message');
         this.sendButton = document.getElementById('sendButton');
+        this.initDateTimeDisplay();
 
         // Bong related stuff
         this.bCommandReceived = false;
@@ -24,6 +25,26 @@ class UIHandler {
 
         this.initUIHandlers();
         this.eventEmitter.on('messageSent', this.onMessageSent.bind(this));
+    }
+
+    initDateTimeDisplay() {
+        this.updateDateTime();  // Update the time initially
+        setInterval(this.updateDateTime.bind(this), 1000);  // Then update every second
+    }
+
+    updateDateTime() {
+        const now = new Date();
+        // Convert to Mountain Time
+        const mtNow = new Date(now.toLocaleString("en-US", {timeZone: "America/Denver"}));
+        const year = mtNow.getFullYear();
+        const month = String(mtNow.getMonth() + 1).padStart(2, '0');  // Months are 0-based
+        const day = String(mtNow.getDate()).padStart(2, '0');
+        const hours = String(mtNow.getHours()).padStart(2, '0');
+        const minutes = String(mtNow.getMinutes()).padStart(2, '0');
+        const seconds = String(mtNow.getSeconds()).padStart(2, '0');
+
+        // Combine date and time parts
+        document.getElementById('header').textContent = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
     onSendButtonClick() {
