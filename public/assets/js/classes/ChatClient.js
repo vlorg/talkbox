@@ -51,7 +51,7 @@ class ChatClient {
         });
 
         this.ws.on('chat message', (messages) => {
-            console.log('Received messages:', messages);
+            // console.log('Received messages:', messages);
             this.displayMessages(messages,);
         });
 
@@ -71,13 +71,15 @@ class ChatClient {
         localStorage.setItem('username', username);
     }
 
-    getColorFromUsername(username) {
-        let sum = 0;
-        for (let i = 0; i < username.length; i++) {
-            sum += username.charCodeAt(i);
+    getColorFromUsername(userId) {
+        let hash = 0;
+        for (let i = 0; i < userId.length; i++) {
+            hash = (hash << 5) - hash + userId.charCodeAt(i);
+            hash |= 0;  // Convert to 32-bit integer
         }
-        const hue = sum % 360;
-        return `hsl(${hue}, 100%, 60%)`; // Bright colors on a black background
+        const hue = Math.abs(hash) % 360;
+        // console.log(`Color for ${userId}: hsl(${hue}, 100%, 85%)`);
+        return `hsl(${hue}, 100%, 85%)`;  // Bright colors on a black background
     }
 
     formatTimestamp(timestamp) {
@@ -121,7 +123,8 @@ class ChatClient {
             messageElement.className = 'chat-message';
 
             // Create colored text nodes using the new method
-            usernameColor = usernameColor ?? this.getColorFromUsername(userId);
+            usernameColor ||= this.getColorFromUsername(userId);
+            console.log(usernameColor);
 
             const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}] `, timeColor);
             const usernameTextNode = this.createColoredTextNode(`${username}:`, usernameColor);
@@ -171,7 +174,7 @@ class ChatClient {
         const originalBackgroundColor = parentDiv.style.backgroundColor;
 
         // Assuming userColor is the color you want to alternate with white
-        const userColor = this.getColorFromUsername(this.usernameInput.value);  // Assuming this method returns the desired color
+        const userColor = this.getColorFromUsername(this.usernameInput.value);  // Get the user's color by username
 
         // Define the CSS for the flash animation
         const css = `
@@ -211,7 +214,7 @@ class ChatClient {
         // Add the animationend event listener
         parentDiv.addEventListener('animationend', handleAnimationEnd);
 
-        this.triggerVibration();
+        // this.triggerVibration();  // TODO: Check current best practices for vibration API
     }
 
     triggerVibration() {
