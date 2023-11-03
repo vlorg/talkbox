@@ -97,7 +97,7 @@ class ChatClient {
         return spanElement;
     }
 
-    displayMessages(messages, timeColor = 'grey', usernameColor = null, messageColor = 'white') {
+    displayMessages(messages, timeColor = 'grey', messageColor = 'white') {
         // Input verification
         if (!Array.isArray(messages)) {
             console.error('Invalid input: messages is not an array');
@@ -122,12 +122,9 @@ class ChatClient {
             const messageElement = document.createElement('div');
             messageElement.className = 'chat-message';
 
-            // Create colored text nodes using the new method
-            usernameColor ||= this.getColorFromUsername(userId);
-            console.log(usernameColor);
 
             const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}] `, timeColor);
-            const usernameTextNode = this.createColoredTextNode(`${username}:`, usernameColor);
+            const usernameTextNode = this.createColoredTextNode(`${username}:`, this.getColorFromUsername(userId));
             const messageTextNode = this.createColoredTextNode(` ${message}`, messageColor);
 
             messageElement.appendChild(timeTextNode);
