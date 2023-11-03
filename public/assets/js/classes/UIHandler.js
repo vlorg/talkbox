@@ -159,7 +159,7 @@ class UIHandler {
                 + String.fromCodePoint(0x273D);
         } else {
             // The tab is active or no 'b' command has been received
-            document.title = 'Rylekor Talkbox';
+            document.title = 'Talkbox';
             this.bCommandReceived = false;  // Reset the flag when the tab is active
         }
     }
