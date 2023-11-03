@@ -12,11 +12,66 @@ const io = socketIo(server, {path: '/talkbox/socket.io'});
 
 app.use('/talkbox', express.static(__dirname + '/public'));
 
-// Set up the circular buffer
-const circularBuffer = Array(BUFFER_CAPACITY).fill(null);
-let bufferIndex = 0;
+class MessageBuffer {
+    constructor(capacity) {
+        this.buffer = Array(capacity).fill(null);
+        this.index = 0;
+    }
 
-// Middleware to capture CF-Connecting-IP header and attach to the socket
+    addMessage(msg) {
+        this.buffer[this.index] = msg;
+        this.index = (this.index + 1) % this.buffer.length;
+    }
+
+    clear() {
+        this.buffer.fill(null);
+    }
+
+    getRecentMessages() {
+        return this.buffer.filter(msg => msg !== null);
+    }
+}
+
+class CommandHandler {
+    static handleCommand(socket, msg, buffer) {
+        const command = msg.message.slice(1, 2);
+        const username = msg.username;
+        const timestamp = msg.timestamp;
+        const userId = msg.userId;
+
+        switch (command) {
+            case '_': // clear the buffer
+                buffer.addMessage(createCommandMessage(timestamp, username, userId, 'CLEAR', '_'));
+                buffer.clear();
+                break;
+            case 'b': // send a bong
+                buffer.addMessage(createCommandMessage(timestamp, username, userId, 'BONG', 'b'));
+                break;
+            case 'e':  // send an emote
+                const color = msg.message.slice(2);
+                buffer.addMessage(createCommandMessage(timestamp, username, userId, color, 'c'));
+                break;
+            default:
+                console.log(`Unknown command: ${command}`);
+        }
+
+        const recentMessages = buffer.getRecentMessages();
+        io.emit('chat message', recentMessages);
+    }
+}
+
+function createCommandMessage(timestamp, username, userId, message, command) {
+    return {
+        timestamp: timestamp,
+        username: username,
+        userId: userId,
+        message: `---> ${message}`,
+        command: command
+    };
+}
+
+const messageBuffer = new MessageBuffer(BUFFER_CAPACITY);
+
 function md5(data) {
     return crypto.createHash('md5').update(data).digest('hex');
 }
@@ -30,9 +85,7 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
     console.log('userId', socket.userId, 'connected from IP:', socket.clientIp);
-
-    // Send recent messages to newly connected client
-    const recentMessages = circularBuffer.filter(msg => msg !== null);
+    const recentMessages = messageBuffer.getRecentMessages();
     socket.emit('chat message', recentMessages);
 
     socket.on('disconnect', () => {
@@ -40,81 +93,17 @@ io.on('connection', (socket) => {
     });
 
     socket.on('chat message', (msg) => {
-        // Append userId to the message
         msg.userId = socket.userId;
-        console.log('Updated msg.userId:', msg);
         if (msg.message.startsWith('$')) {
-            handleCommand(socket, msg);
+            CommandHandler.handleCommand(socket, msg, messageBuffer);
         } else {
-            // Store the message in the circular buffer
-            circularBuffer[bufferIndex] = msg;
-            bufferIndex = (bufferIndex + 1) % BUFFER_CAPACITY;
-            // console.log('Updated circularBuffer:', circularBuffer);
-
-            // Get all non-null messages from the circular buffer
-            const recentMessages = circularBuffer.filter(msg => msg !== null);
-            console.log('Broadcasting recentMessages:', recentMessages);
-
-            // Broadcast the entire chat log to all connected clients
+            messageBuffer.addMessage(msg);
+            const recentMessages = messageBuffer.getRecentMessages();
             io.emit('chat message', recentMessages);
         }
     });
 });
 
-function handleCommand(socket, msg) {
-    const command = msg.message.slice(1, 2);
-    const username = msg.username;
-    const timestamp = msg.timestamp;
-    const userId = msg.userId;
-
-    console.log({command, username, userId});
-
-    switch (command) {
-        case '_': // clear the buffer
-            const clearMessageObject = {
-                timestamp: timestamp,
-                username: username,
-                userId: userId,
-                message: `---> CLEAR`,
-                command: 'c'
-            };
-            circularBuffer[bufferIndex] = clearMessageObject;
-            bufferIndex = (bufferIndex + 1) % BUFFER_CAPACITY;
-            circularBuffer.fill(null);
-            io.emit('chat message', circularBuffer);
-            break;
-        case 'b': // send a bong
-            const bongMessageObject = {
-                timestamp: timestamp,
-                username: username,
-                userId: userId,
-                message: `---> BONG`,
-                command: 'b'
-            };
-            circularBuffer[bufferIndex] = bongMessageObject;
-            bufferIndex = (bufferIndex + 1) % BUFFER_CAPACITY;
-            const recentMessages = circularBuffer.filter(msg => msg !== null);
-            io.emit('chat message', recentMessages);
-            break;
-        case 'e':  // send an emote
-            const color = msg.message.slice(2);
-            const colorMessageObject = {
-                timestamp: timestamp,
-                username: username,
-                userId: userId,
-                message: `---> ${color}`,
-                command: 'c'
-            };
-            circularBuffer[bufferIndex] = colorMessageObject;
-            bufferIndex = (bufferIndex + 1) % BUFFER_CAPACITY;
-            io.emit('chat message', circularBuffer);
-            break;
-
-        default:
-            console.log(`Unknown command: ${command}`);
-    }
-}
-
-server.listen(3000, () => {
+server.listen(SERVER_PORT, () => {
     console.log('listening on *:' + SERVER_PORT);
 });
