@@ -67,6 +67,13 @@ class UIHandler {
         return spanElement;
     }
 
+    createColoredHTMLNode(html, color) {
+        const spanElement = document.createElement('span');
+        spanElement.style.color = color;
+        spanElement.innerHTML = html;
+        return spanElement;
+    }
+
     displayMessages(messages, timeColor = 'grey', messageColor = 'white') {
         // Input verification
         if (!Array.isArray(messages)) {
@@ -88,14 +95,17 @@ class UIHandler {
             }, index) => {
             if (!username || !message || !timestamp) return;
 
-            const formattedTimestamp = MessageFormatter.formatTimestamp(timestamp);
             const messageElement = document.createElement('div');
             messageElement.className = 'chat-message';
 
+            // Format the timestamp and message
+            const formattedTimestamp = MessageFormatter.formatTimestamp(timestamp);
+            const formattedMessage = MessageFormatter.convertLinksToAnchors(message);
 
+            // Create the text nodes
             const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}] `, timeColor);
             const usernameTextNode = this.createColoredTextNode(`${username}:`, ColorGenerator.getColorFromUserId(userId));
-            const messageTextNode = this.createColoredTextNode(` ${message}`, messageColor);
+            const messageTextNode = this.createColoredHTMLNode(` ${formattedMessage}`, messageColor);
 
             messageElement.appendChild(timeTextNode);
             messageElement.appendChild(usernameTextNode);
@@ -103,7 +113,7 @@ class UIHandler {
 
             this.chatBox.appendChild(messageElement);
 
-            // If the message is a command, then handle client effects
+            // If the message is a BONG command, then handle client effects
             if (command === 'b' && index === messages.length - 1) {
                 this.bCommandReceived = true;
                 this.updateTabTitle();
