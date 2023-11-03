@@ -52,7 +52,7 @@ class ChatClient {
 
         this.ws.on('chat message', (messages) => {
             console.log('Received messages:', messages);
-            this.displayMessages(messages);
+            this.displayMessages(messages,);
         });
 
         this.ws.on('disconnect', () => {
@@ -88,7 +88,14 @@ class ChatClient {
         return `${hours}:${minutes}:${seconds}`;
     }
 
-    displayMessages(messages) {
+    createColoredTextNode(text, color) {
+        const spanElement = document.createElement('span');
+        spanElement.style.color = color;
+        spanElement.textContent = text;
+        return spanElement;
+    }
+
+    displayMessages(messages, timeColor = 'grey', usernameColor = null, messageColor = 'white') {
         // Input verification
         if (!Array.isArray(messages)) {
             console.error('Invalid input: messages is not an array');
@@ -98,7 +105,6 @@ class ChatClient {
         const isAtBottom = this.chatBox.scrollHeight - this.chatBox.clientHeight <= this.chatBox.scrollTop + 1;
 
         this.chatBox.innerHTML = '';
-        // console.log(messages);
         // Display each message
         messages.forEach((
             {
@@ -111,19 +117,19 @@ class ChatClient {
             if (!username || !message || !timestamp) return;
 
             const formattedTimestamp = this.formatTimestamp(timestamp);
-            const color = this.getColorFromUsername(userId);
             const messageElement = document.createElement('div');
             messageElement.className = 'chat-message';
-            messageElement.style.color = color;
 
-            // Create text nodes to prevent XSS
-            const strongElement = document.createElement('strong');
-            strongElement.style.color = color;
-            strongElement.textContent = `[${formattedTimestamp}] ${username}:`;
-            messageElement.appendChild(strongElement);
+            // Create colored text nodes using the new method
+            usernameColor = usernameColor ?? this.getColorFromUsername(userId);
 
-            const textNode = document.createTextNode(` ${message}`);
-            messageElement.appendChild(textNode);
+            const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}] `, timeColor);
+            const usernameTextNode = this.createColoredTextNode(`${username}:`, usernameColor);
+            const messageTextNode = this.createColoredTextNode(` ${message}`, messageColor);
+
+            messageElement.appendChild(timeTextNode);
+            messageElement.appendChild(usernameTextNode);
+            messageElement.appendChild(messageTextNode);
 
             this.chatBox.appendChild(messageElement);
 
