@@ -49,7 +49,7 @@ io.on('connection', (socket) => {
             // Store the message in the circular buffer
             circularBuffer[bufferIndex] = msg;
             bufferIndex = (bufferIndex + 1) % BUFFER_CAPACITY;
-            console.log('Updated circularBuffer:', circularBuffer);
+            // console.log('Updated circularBuffer:', circularBuffer);
 
             // Get all non-null messages from the circular buffer
             const recentMessages = circularBuffer.filter(msg => msg !== null);
