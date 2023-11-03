@@ -29,14 +29,14 @@ io.use((socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    console.log('a user with userId', socket.userId, 'connected from IP:', socket.clientIp);
+    console.log('userId', socket.userId, 'connected from IP:', socket.clientIp);
 
     // Send recent messages to newly connected client
     const recentMessages = circularBuffer.filter(msg => msg !== null);
     socket.emit('chat message', recentMessages);
 
     socket.on('disconnect', () => {
-        console.log('a user with userId', socket.userId, 'disconnected from IP:', socket.clientIp);
+        console.log('userId', socket.userId, 'disconnected from IP:', socket.clientIp);
     });
 
     socket.on('chat message', (msg) => {

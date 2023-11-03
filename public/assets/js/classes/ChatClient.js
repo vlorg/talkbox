@@ -80,6 +80,14 @@ class ChatClient {
         return `hsl(${hue}, 100%, 60%)`; // Bright colors on a black background
     }
 
+    formatTimestamp(timestamp) {
+        const date = new Date(timestamp);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    }
+
     displayMessages(messages) {
         // Input verification
         if (!Array.isArray(messages)) {
@@ -92,9 +100,17 @@ class ChatClient {
         this.chatBox.innerHTML = '';
         // console.log(messages);
         // Display each message
-        messages.forEach(({username, message, command, timestamp, userId}, index) => {
+        messages.forEach((
+            {
+                username,
+                message,
+                command,
+                timestamp,
+                userId
+            }, index) => {
             if (!username || !message || !timestamp) return;
 
+            const formattedTimestamp = this.formatTimestamp(timestamp);
             const color = this.getColorFromUsername(userId);
             const messageElement = document.createElement('div');
             messageElement.className = 'chat-message';
@@ -103,7 +119,7 @@ class ChatClient {
             // Create text nodes to prevent XSS
             const strongElement = document.createElement('strong');
             strongElement.style.color = color;
-            strongElement.textContent = `[${timestamp}] ${username}:`;
+            strongElement.textContent = `[${formattedTimestamp}] ${username}:`;
             messageElement.appendChild(strongElement);
 
             const textNode = document.createTextNode(` ${message}`);
