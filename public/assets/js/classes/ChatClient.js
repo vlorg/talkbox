@@ -71,15 +71,22 @@ class ChatClient {
         localStorage.setItem('username', username);
     }
 
-    getColorFromUsername(userId) {
+    getColorFromUserId(userId) {
         let hash = 0;
         for (let i = 0; i < userId.length; i++) {
             hash = (hash << 5) - hash + userId.charCodeAt(i);
             hash |= 0;  // Convert to 32-bit integer
         }
-        const hue = Math.abs(hash) % 360;
-        // console.log(`Color for ${userId}: hsl(${hue}, 100%, 85%)`);
-        return `hsl(${hue}, 100%, 85%)`;  // Bright colors on a black background
+
+        // Ensure a good spread of hue values by using the golden ratio
+        const golden_ratio_conjugate = 0.618033988749895;
+        const hue = Math.abs(hash * golden_ratio_conjugate % 1 * 360);
+
+        // You might want to tweak these values to get the desired vibrancy
+        const saturation = '100%';
+        const lightness = '50%';
+
+        return `hsl(${hue}, ${saturation}, ${lightness})`;
     }
 
     formatTimestamp(timestamp) {
@@ -124,7 +131,7 @@ class ChatClient {
 
 
             const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}] `, timeColor);
-            const usernameTextNode = this.createColoredTextNode(`${username}:`, this.getColorFromUsername(userId));
+            const usernameTextNode = this.createColoredTextNode(`${username}:`, this.getColorFromUserId(userId));
             const messageTextNode = this.createColoredTextNode(` ${message}`, messageColor);
 
             messageElement.appendChild(timeTextNode);
@@ -171,7 +178,7 @@ class ChatClient {
         const originalBackgroundColor = parentDiv.style.backgroundColor;
 
         // Assuming userColor is the color you want to alternate with white
-        const userColor = this.getColorFromUsername(this.usernameInput.value);  // Get the user's color by username
+        const userColor = this.getColorFromUserId(this.usernameInput.value);  // JK it's actually the user's name
 
         // Define the CSS for the flash animation
         const css = `
