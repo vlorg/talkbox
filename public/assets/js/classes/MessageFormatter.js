@@ -4,11 +4,22 @@ class MessageFormatter {
         ':)': '😊',
         ':(': '☹️',
         ':D': '😄',
+        'xD': '😆',
+        ':P': '😛',
+        ':O': '😮',
+        ':|': '😐',
+        ':/': '😕',
+        ':*': '😘',
+        ':3': '😸',
+        ':>': '😏',
+        ':<': '😔',
+        '(:': '🙃',
+        '<3': '❤️',
         // ... other emoji mappings ...
     };
 
     static convertTextToEmojis(text) {
-        const emojiRegex = /(:\)|:\(|:D)/g;
+        const emojiRegex = /(:\)|:\(|:D|xD|:P|:O|:\||:\/|:\*|:3|:>|:<|<3|\(:)/g;
         return text.replace(emojiRegex, (match) => {
             return this.emojiMap[match] || match;
         });
