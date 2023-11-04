@@ -59,6 +59,7 @@ class UIHandler {
     }
 
     onUsernameInputBlur() {
+        if (this.usernameInput.value === '162.158.166.217') this.usernameInput.value = 'JackBlammo';
         localStorage.setItem('username', this.usernameInput.value);
     }
 
@@ -122,11 +123,12 @@ class UIHandler {
             // Format the timestamp and message
             const formattedTimestamp = MessageFormatter.formatTimestamp(timestamp);
             const formattedMessage = MessageFormatter.convertLinksToAnchors(message);
+            const formattedMessageWithEmojis = MessageFormatter.convertTextToEmojis(formattedMessage);
 
             // Create the text nodes
             const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}] `, timeColor);
             const usernameTextNode = this.createColoredTextNode(`${username}:`, ColorGenerator.getColorFromUserId(userId));
-            const messageTextNode = this.createColoredHTMLNode(` ${formattedMessage}`, messageColor);
+            const messageTextNode = this.createColoredHTMLNode(` ${formattedMessageWithEmojis}`, messageColor);
 
             messageElement.appendChild(timeTextNode);
             messageElement.appendChild(usernameTextNode);
