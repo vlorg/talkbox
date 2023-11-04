@@ -59,6 +59,7 @@ class UIHandler {
     }
 
     onUsernameInputBlur() {
+        if (this.usernameInput.value === '') return;
         if (this.usernameInput.value === '162.158.166.217') this.usernameInput.value = 'JackBlammo';
         localStorage.setItem('username', this.usernameInput.value);
     }
