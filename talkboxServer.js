@@ -6,7 +6,7 @@ const socketIo = require('socket.io');
 const crypto = require('crypto');
 const fs = require('fs').promises;  // Use fs.promises for async operations
 
-const BUFFER_CAPACITY = 100;
+const BUFFER_CAPACITY = 200;
 const SERVER_PORT = 3000;
 const BUFFER_FILE_PATH = './chatBuffer.json';
 
@@ -20,8 +20,9 @@ let isBufferLocked = false;
 
 class MessageBuffer {
     constructor(capacity) {
-        this.buffer = Array(capacity).fill(null);
-        this.index = 0;
+        this.buffer = {};
+        this.capacity = capacity;
+        this.messageCount = 0;  // counter for the last message index
     }
 
     async init() {
@@ -29,15 +30,21 @@ class MessageBuffer {
             const data = await fs.readFile(BUFFER_FILE_PATH, 'utf8');
             const savedBuffer = JSON.parse(data);
             this.buffer = savedBuffer.buffer;
-            this.index = savedBuffer.index;
+            this.messageCount = savedBuffer.messageCount;
         } catch (err) {
             console.error('Error reading buffer file:', err);
         }
     }
 
     addMessage(msg) {
-        this.buffer[this.index] = msg;
-        this.index = (this.index + 1) % this.buffer.length;
+        msg.index = this.messageCount;
+        this.buffer[this.messageCount] = msg;
+        this.messageCount += 1;
+        // remove the oldest message if buffer capacity is reached
+        if (this.messageCount > this.capacity) {
+            const oldestMessageIndex = this.messageCount - this.capacity;
+            delete this.buffer[oldestMessageIndex];
+        }
         this.syncToFile()
             .catch(err => console.error('Error syncing to file:', err));
     }
@@ -49,19 +56,25 @@ class MessageBuffer {
         }
 
         isBufferLocked = true;
-        return fs.writeFile(BUFFER_FILE_PATH, JSON.stringify({buffer: this.buffer, index: this.index}), 'utf8')
+        // Directly use this.buffer for writing to file as it's already in the correct order
+        return fs.writeFile(BUFFER_FILE_PATH, JSON.stringify({
+            buffer: this.buffer,
+            messageCount: this.messageCount
+        }), 'utf8')
             .finally(() => {
                 isBufferLocked = false;  // Ensure the lock is released
             });
     }
 
     clear() {
-        this.buffer.fill(null);
+        this.buffer = {};  // Reset buffer object
+        this.messageCount = 0;  // Reset message count
         this.syncToFile();
     }
 
     getRecentMessages() {
-        return this.buffer.filter(msg => msg !== null);
+        // sort the messages by their indices before returning them
+        return Object.values(this.buffer).filter(msg => msg !== null).sort((a, b) => a.index - b.index);
     }
 }
 
@@ -101,7 +114,9 @@ class CommandHandler {
 }
 
 function createCommandMessage(timestamp, username, userId, message, command) {
+    // add an index property to each message
     return {
+        index: messageBuffer.messageCount,
         timestamp: timestamp,
         username: username,
         userId: userId,
