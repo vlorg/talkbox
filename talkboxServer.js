@@ -105,7 +105,7 @@ function createCommandMessage(timestamp, username, userId, message, command) {
         timestamp: timestamp,
         username: username,
         userId: userId,
-        message: `---> ${message}`,
+        message: `--> ${message}`,
         command: command
     };
 }
