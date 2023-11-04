@@ -72,6 +72,7 @@ class CommandHandler {
         const command = msg.message.slice(1, 2);
         const username = msg.username;
         const timestamp = msg.timestamp;
+
         const userId = msg.userId;
 
         switch (command) {
@@ -82,9 +83,13 @@ class CommandHandler {
             case 'b': // send a bong
                 buffer.addMessage(createCommandMessage(timestamp, username, userId, 'BONG', 'b'));
                 break;
-            case 'e':  // send an emote
-                const color = msg.message.slice(2);
+            case 'c':  // send an emote
+                const color = `your color is now ${msg.message.slice(2)}! TAH-DAH!`;
                 buffer.addMessage(createCommandMessage(timestamp, username, userId, color, 'c'));
+                break;
+            case 'e':  // send an emote
+                const emote = msg.message.slice(2);
+                buffer.addMessage(createCommandMessage(timestamp, username, userId, emote, 'e'));
                 break;
             default:
                 console.log(`Unknown command: ${command}`);
