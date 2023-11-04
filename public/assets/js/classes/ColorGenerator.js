@@ -6,13 +6,15 @@ class ColorGenerator {
             hash |= 0;  // Convert to 32-bit integer
         }
 
-        // Ensure a good spread of hue values by using the golden ratio
-        const golden_ratio_conjugate = 0.618033988749895;
-        const hue = Math.abs(hash * golden_ratio_conjugate % 1 * 360);
+        // Convert the hash to a positive integer
+        hash = Math.abs(hash);
+
+        // Use the hash to calculate a hue value
+        const hue = hash % 360;
 
         // You might want to tweak these values to get the desired vibrancy
         const saturation = '100%';
-        const lightness = '50%';
+        const lightness = '70%';
 
         return `hsl(${hue}, ${saturation}, ${lightness})`;
     }
