@@ -9,6 +9,11 @@ class UIHandler {
         this.sendButton = document.getElementById('sendButton');
         this.initDateTimeDisplay();
 
+        // Sanitize inputs
+        this.usernameInput.value = this.sanitizeInput(this.usernameInput.value);
+        this.messageInput.value = this.sanitizeInput(this.messageInput.value);
+        this.sendButton.value = this.sanitizeInput(this.sendButton.value);
+
         // Bong related stuff
         this.bCommandReceived = false;
         this.updateTabTitle = this.updateTabTitle.bind(this);
@@ -25,6 +30,10 @@ class UIHandler {
 
         this.initUIHandlers();
         this.eventEmitter.on('messageSent', this.onMessageSent.bind(this));
+    }
+
+    sanitizeInput(input) {
+        return input.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
     initDateTimeDisplay() {
@@ -48,17 +57,20 @@ class UIHandler {
     }
 
     onSendButtonClick() {
+        this.usernameInput.value = this.sanitizeInput(this.usernameInput.value);
         const username = this.usernameInput.value;
         const message = this.messageInput.value;
         this.eventEmitter.emit('sendMessage', {username, message});
     }
 
     onMessageSent(username) {
+        this.usernameInput.value = this.sanitizeInput(this.usernameInput.value);
         this.messageInput.value = '';
         localStorage.setItem('username', username);
     }
 
     onUsernameInputBlur() {
+        this.usernameInput.value = this.sanitizeInput(this.usernameInput.value);
         if (this.usernameInput.value === '') return;
         localStorage.setItem('username', this.usernameInput.value);
     }
