@@ -1,11 +1,11 @@
 body {
     background-color: black;
     color: white;
-    font-family: Courier, monospace;
+    font-family: 'Poppins', sans-serif;
 }
 
 .chat-message {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: inherit;
     font-size: 14px;
 }
 
