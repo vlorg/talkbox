@@ -36,16 +36,23 @@ body {
     display: none;
 }
 
-#animationCanvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: -1;
-    opacity: 0.5;
-}
-
 a {
     text-decoration: none;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.custom-rounded {
+    border-radius: 0.25rem !important; /* The value from .border-success */
 }
 
 #canvas-container {
@@ -78,4 +85,11 @@ a {
 
 .chat-message:hover .timestamp, .chat-message:focus-within .timestamp {
     visibility: visible;
+}
+
+.button-group-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Adjust this as necessary for your UI */
 }
