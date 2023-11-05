@@ -194,12 +194,15 @@ class UIHandler {
             }
         };
 
+        // Mouse events don't need to be passive
         messageElement.addEventListener('mouseenter', showTimestamp);
         messageElement.addEventListener('mouseleave', hideTimestamp);
-        messageElement.addEventListener('touchstart', showTimestamp);
+
+        // Touch events should be passive to avoid scroll-blocking warning
+        messageElement.addEventListener('touchstart', showTimestamp, {passive: true});
         messageElement.addEventListener('touchend', () => {
             setTimeout(hideTimestamp, 2000);
-        });
+        }, {passive: true});
     }
 
     addMessageToChatBox(messageElement) {
