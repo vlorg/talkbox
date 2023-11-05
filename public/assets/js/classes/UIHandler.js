@@ -118,81 +118,93 @@ class UIHandler {
     }
 
     displayMessages(messages, timeColor = 'grey', messageColor = 'white') {
-        // Input verification
         if (!Array.isArray(messages)) {
             console.error('Invalid input: messages is not an array');
             return;
         }
-        // Check if the user is currently at the bottom of the chatBox
-        const isAtBottom = this.chatBox.scrollHeight - this.chatBox.clientHeight <= this.chatBox.scrollTop + 1;
 
+        const isAtBottom = this.isUserAtBottom();
+
+        // Clear current messages
         this.chatBox.innerHTML = '';
-        // Display each message
-        messages.forEach((
-            {
-                username,
-                message,
-                command,
-                timestamp,
-                userId
-            }, index) => {
-            if (!username || !message || !timestamp) return;
 
-            const messageElement = document.createElement('div');
-            messageElement.className = 'chat-message';
-            messageElement.tabIndex = -1;  // Make the message element focusable without adding it to the tab order
-
-            // Format the timestamp and message
-            const formattedTimestamp = MessageFormatter.formatTimestamp(timestamp);
-            const formattedMessage = MessageFormatter.convertLinksToAnchors(message);
-            const formattedMessageWithEmojis = MessageFormatter.convertTextToEmojis(formattedMessage);
-
-            // Create the text nodes
-            const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}]`, timeColor, true);
-            const usernameTextNode = this.createColoredTextNode(`${username}:`, ColorGenerator.getColorFromUserId(userId));
-            const messageTextNode = this.createColoredHTMLNode(` ${formattedMessageWithEmojis}`, messageColor);
-
-            messageElement.appendChild(usernameTextNode);
-            messageElement.appendChild(messageTextNode);
-
-            this.chatBox.appendChild(messageElement);
-
-            // Event listeners to inject and remove the timestamp.
-            messageElement.addEventListener('mouseenter', function () {
-                if (!messageElement.contains(timeTextNode)) {
-                    messageElement.insertBefore(timeTextNode, messageElement.firstChild);
-                }
-            });
-
-            messageElement.addEventListener('mouseleave', function () {
-                if (messageElement.contains(timeTextNode)) {
-                    messageElement.removeChild(timeTextNode);
-                }
-            });
-            messageElement.addEventListener('touchstart', function () {
-                if (!messageElement.contains(timeTextNode)) {
-                    messageElement.insertBefore(timeTextNode, messageElement.firstChild);
-                }
-            });
-
-            messageElement.addEventListener('touchend', function () {
-                setTimeout(() => { // Delay to allow the user to read the timestamp
-                    if (messageElement.contains(timeTextNode)) {
-                        messageElement.removeChild(timeTextNode);
-                    }
-                }, 2000);
-            });
-
-            // If the message is a BONG command, then handle client effects
-            if (command === 'b' && index === messages.length - 1) {
-                this.bCommandReceived = true;
-                this.updateTabTitle();
-                this.flashScreen();
+        // Iterate over the messages and create their elements
+        messages.forEach((messageData, index) => {
+            if (this.isValidMessage(messageData)) {
+                const messageElement = this.createMessageElement(messageData, timeColor, messageColor);
+                this.addMessageToChatBox(messageElement);
+                this.handleSpecialCommand(messageData, index, messages.length);
             }
-            this.updateTabTitle();
         });
 
-        // If the user was already at the bottom, then scroll to the new bottom position
+        // Maintain scroll position
+        this.scrollToBottomIfNeeded(isAtBottom);
+    }
+
+    isUserAtBottom() {
+        return this.chatBox.scrollHeight - this.chatBox.clientHeight <= this.chatBox.scrollTop + 1;
+    }
+
+    isValidMessage({username, message, timestamp}) {
+        return username && message && timestamp;
+    }
+
+    createMessageElement({username, message, timestamp, userId}, timeColor, messageColor) {
+        const messageElement = document.createElement('div');
+        messageElement.className = 'chat-message';
+        messageElement.tabIndex = -1;
+
+        const formattedTimestamp = MessageFormatter.formatTimestamp(timestamp);
+        const formattedMessage = MessageFormatter.convertLinksToAnchors(message);
+        const formattedMessageWithEmojis = MessageFormatter.convertTextToEmojis(formattedMessage);
+
+        const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}]`, timeColor, true);
+        const usernameTextNode = this.createColoredTextNode(`${username}:`, ColorGenerator.getColorFromUserId(userId));
+        const messageTextNode = this.createColoredHTMLNode(` ${formattedMessageWithEmojis}`, messageColor);
+
+        messageElement.appendChild(usernameTextNode);
+        messageElement.appendChild(messageTextNode);
+
+        this.setupTimestampInteraction(messageElement, timeTextNode);
+
+        return messageElement;
+    }
+
+    setupTimestampInteraction(messageElement, timeTextNode) {
+        // Add all the interaction event listeners
+        const showTimestamp = () => {
+            if (!messageElement.contains(timeTextNode)) {
+                messageElement.insertBefore(timeTextNode, messageElement.firstChild);
+            }
+        };
+
+        const hideTimestamp = () => {
+            if (messageElement.contains(timeTextNode)) {
+                messageElement.removeChild(timeTextNode);
+            }
+        };
+
+        messageElement.addEventListener('mouseenter', showTimestamp);
+        messageElement.addEventListener('mouseleave', hideTimestamp);
+        messageElement.addEventListener('touchstart', showTimestamp);
+        messageElement.addEventListener('touchend', () => {
+            setTimeout(hideTimestamp, 2000);
+        });
+    }
+
+    addMessageToChatBox(messageElement) {
+        this.chatBox.appendChild(messageElement);
+    }
+
+    handleSpecialCommand({command}, index, length) {
+        if (command === 'b' && index === length - 1) {
+            this.bCommandReceived = true;
+            this.updateTabTitle();
+            this.flashScreen();
+        }
+    }
+
+    scrollToBottomIfNeeded(isAtBottom) {
         if (isAtBottom) {
             this.chatBox.scrollTop = this.chatBox.scrollHeight - this.chatBox.clientHeight;
         }
