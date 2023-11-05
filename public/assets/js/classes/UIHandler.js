@@ -92,12 +92,21 @@ class UIHandler {
                 this.onSendButtonClick();
             }
         });
+
     }
 
-    createColoredTextNode(text, color) {
+    createColoredTextNode(text, color, isTimestamp = false) {
         const spanElement = document.createElement('span');
         spanElement.style.color = color;
         spanElement.textContent = text;
+
+        // If the node is a timestamp, we won't append it immediately but instead return it
+        // for conditional appending based on user interaction.
+        if (isTimestamp) {
+            spanElement.className = 'timestamp';
+            return spanElement;
+        }
+
         return spanElement;
     }
 
@@ -131,6 +140,7 @@ class UIHandler {
 
             const messageElement = document.createElement('div');
             messageElement.className = 'chat-message';
+            messageElement.tabIndex = -1;  // Make the message element focusable without adding it to the tab order
 
             // Format the timestamp and message
             const formattedTimestamp = MessageFormatter.formatTimestamp(timestamp);
@@ -138,15 +148,40 @@ class UIHandler {
             const formattedMessageWithEmojis = MessageFormatter.convertTextToEmojis(formattedMessage);
 
             // Create the text nodes
-            const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}]`, timeColor);
+            const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}]`, timeColor, true);
             const usernameTextNode = this.createColoredTextNode(`${username}:`, ColorGenerator.getColorFromUserId(userId));
             const messageTextNode = this.createColoredHTMLNode(` ${formattedMessageWithEmojis}`, messageColor);
 
-            messageElement.appendChild(timeTextNode);
             messageElement.appendChild(usernameTextNode);
             messageElement.appendChild(messageTextNode);
 
             this.chatBox.appendChild(messageElement);
+
+            // Event listeners to inject and remove the timestamp.
+            messageElement.addEventListener('mouseenter', function () {
+                if (!messageElement.contains(timeTextNode)) {
+                    messageElement.insertBefore(timeTextNode, messageElement.firstChild);
+                }
+            });
+
+            messageElement.addEventListener('mouseleave', function () {
+                if (messageElement.contains(timeTextNode)) {
+                    messageElement.removeChild(timeTextNode);
+                }
+            });
+            messageElement.addEventListener('touchstart', function () {
+                if (!messageElement.contains(timeTextNode)) {
+                    messageElement.insertBefore(timeTextNode, messageElement.firstChild);
+                }
+            });
+
+            messageElement.addEventListener('touchend', function () {
+                setTimeout(() => { // Delay to allow the user to read the timestamp
+                    if (messageElement.contains(timeTextNode)) {
+                        messageElement.removeChild(timeTextNode);
+                    }
+                }, 2000);
+            });
 
             // If the message is a BONG command, then handle client effects
             if (command === 'b' && index === messages.length - 1) {

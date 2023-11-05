@@ -70,3 +70,12 @@ a {
     background: rgb(0, 0, 0);
     color: var(--bs-body-color);
 }
+
+.timestamp {
+    visibility: hidden;
+    color: grey;
+}
+
+.chat-message:hover .timestamp, .chat-message:focus-within .timestamp {
+    visibility: visible;
+}
