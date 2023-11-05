@@ -1,4 +1,9 @@
 class UIHandler {
+
+    static COMMAND_COLOR = 'limegreen';
+    static TIME_COLOR = 'grey';
+    static MESSAGE_COLOR = 'white';
+
     constructor(eventEmitter) {
         this.eventEmitter = eventEmitter;
 
@@ -117,7 +122,7 @@ class UIHandler {
         return spanElement;
     }
 
-    displayMessages(messages, timeColor = 'grey', messageColor = 'white') {
+    displayMessages(messages, timeColor = UIHandler.TIME_COLOR, messageColor = UIHandler.MESSAGE_COLOR) {
         if (!Array.isArray(messages)) {
             console.error('Invalid input: messages is not an array');
             return;
@@ -131,7 +136,12 @@ class UIHandler {
         // Iterate over the messages and create their elements
         messages.forEach((messageData, index) => {
             if (this.isValidMessage(messageData)) {
-                const messageElement = this.createMessageElement(messageData, timeColor, messageColor);
+                // Override the message color if it's a command
+                let currentMessageColor = messageColor;
+                if (messageData.message.startsWith('-->')) {
+                    currentMessageColor = UIHandler.COMMAND_COLOR;
+                }
+                const messageElement = this.createMessageElement(messageData, timeColor, currentMessageColor);
                 this.addMessageToChatBox(messageElement);
                 this.handleSpecialCommand(messageData, index, messages.length);
             }
