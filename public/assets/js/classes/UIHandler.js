@@ -13,6 +13,7 @@ class UIHandler {
         this.messageInput = document.getElementById('message');
         this.sendButton = document.getElementById('sendButton');
         this.initDateTimeDisplay();
+        this.initCanvasContainer();
 
         // Sanitize inputs
         this.usernameInput.value = this.sanitizeInput(this.usernameInput.value);
@@ -77,6 +78,7 @@ class UIHandler {
     onUsernameInputBlur() {
         this.usernameInput.value = this.sanitizeInput(this.usernameInput.value);
         if (this.usernameInput.value === '') return;
+
         localStorage.setItem('username', this.usernameInput.value);
     }
 
@@ -295,4 +297,45 @@ class UIHandler {
             console.warn('Vibration API not supported');
         }
     }
+
+    initCanvasContainer() {
+        const canvasContainer = document.getElementById('canvas-container');
+        // Clear existing content if any
+        canvasContainer.innerHTML = '';
+
+        // Create the button group container
+        const buttonGroup = document.createElement('div');
+        buttonGroup.setAttribute('class', 'button-group-center');
+
+        // Create the 'Marbles' button
+        const marblesButton = document.createElement('button');
+        marblesButton.textContent = 'Play Marbles';
+        marblesButton.classList.add('btn', 'btn-primary');
+        marblesButton.addEventListener('click', () => {
+            this.loadMarbles();
+        });
+
+        // Append the button to the button group
+        buttonGroup.appendChild(marblesButton);
+
+        // Append the button group to the canvas container
+        canvasContainer.appendChild(buttonGroup);
+    }
+
+    loadMarbles() {
+        const canvasContainer = document.getElementById('canvas-container');
+        // Clear the button group
+        canvasContainer.innerHTML = '';
+
+        // Create the canvas element
+        const canvas = document.createElement('canvas');
+        canvas.setAttribute('id', 'canvas');
+        canvasContainer.appendChild(canvas);
+
+        // Load the Marbles script dynamically
+        const script = document.createElement('script');
+        script.setAttribute('src', 'assets/js/app/marbles.js');
+        document.body.appendChild(script);
+    }
+
 }

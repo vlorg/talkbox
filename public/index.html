@@ -27,22 +27,21 @@
         <div class="col-12 col-md-9 py-3" id="chatBox"></div>
         <div class="col-12 col-md-3">
             <div class="input-group mb-2">
-                <label for="username"></label>
-                <input class="border-success form-control username" type="text" id="username"
+                <label class="visually-hidden" for="username"></label>
+                <input class="custom-rounded border-success form-control username" type="text" id="username"
                        name="username" placeholder="Username" required="" minlength="1"
                        maxlength="20"
                        tabindex="0"
                 >
                 <button class="btn btn-primary" id="sendButton" type="button" tabindex="-1">Send</button>
             </div>
-            <label for="message"></label>
+            <label class="visually-hidden" for="message"></label>
             <textarea class="border-info form-control mb-2 message" id="message" rows="4"
                       placeholder="Type message here" name="message" spellcheck="true"
                       required="" maxlength="200" minlength="1"
                       tabindex="0">
             </textarea>
-            <div id="canvas-container">
-                <canvas id="canvas"></canvas>
+            <div id="canvas-container" class="p-2">
             </div>
         </div>
     </div>
@@ -57,7 +56,6 @@
 <script src="assets/js/classes/UIHandler.js"></script>
 <script src="assets/js/classes/WebSocketHandler.js"></script>
 <script src="assets/js/main.js"></script>
-<script src="assets/js/app/marbles.js"></script>
 </body>
 
 </html>
