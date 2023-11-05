@@ -138,7 +138,7 @@ class UIHandler {
             const formattedMessageWithEmojis = MessageFormatter.convertTextToEmojis(formattedMessage);
 
             // Create the text nodes
-            const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}] `, timeColor);
+            const timeTextNode = this.createColoredTextNode(`[${formattedTimestamp}]`, timeColor);
             const usernameTextNode = this.createColoredTextNode(`${username}:`, ColorGenerator.getColorFromUserId(userId));
             const messageTextNode = this.createColoredHTMLNode(` ${formattedMessageWithEmojis}`, messageColor);
 
