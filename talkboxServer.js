@@ -1,20 +1,19 @@
-// noinspection JSValidateTypes
-
+const BUFFER_CAPACITY = 200;
+const SERVER_PORT = 3000;
+const BUFFER_FILE_PATH = './chatBuffer.json';
+const AuthConfig = require('./AuthConfig');
 const express = require('express');
+const expressBasicAuth = require('express-basic-auth');
 const http = require('http');
 const socketIo = require('socket.io');
 const crypto = require('crypto');
 const fs = require('fs').promises;  // Use fs.promises for async operations
-
-const BUFFER_CAPACITY = 200;
-const SERVER_PORT = 3000;
-const BUFFER_FILE_PATH = './chatBuffer.json';
-
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {path: '/talkbox/socket.io'});
 
-app.use('/talkbox', express.static(__dirname + '/public'));
+// Apply the basic auth middleware for the /talkbox path
+app.use('/talkbox', expressBasicAuth(AuthConfig.getBasicAuthOptions()), express.static(__dirname + '/public'));
 
 let isBufferLocked = false;
 
