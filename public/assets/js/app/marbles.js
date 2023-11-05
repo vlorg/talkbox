@@ -874,12 +874,12 @@ class UserInputManager {
 // INFO: Configuration
 class Config {
     static maxDistanceMultiplier = 200;
-    static maxGravityPointMass = 5e6;
-    static maxFriction = 1;
+    static maxGravityPointMass = 0;
+    static maxFriction = 0;
     static maxMass = 10;
     static maxAttraction = 0;
-    static maxRepulsion = 0;
-    static maxRadius = 5;
+    static maxRepulsion = 5;
+    static maxRadius = 10;
 
     static maxSpeed = 100;
     static maxCircles = 1100;
