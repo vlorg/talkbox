@@ -96,7 +96,7 @@ class CommandHandler {
             case 'b': // send a bong
                 buffer.addMessage(createCommandMessage(timestamp, username, userId, 'BONG', 'b'));
                 break;
-            case 'c':  // send an emote
+            case 'c':  // TODO: change the color of the user's name
                 const color = `your color is now ${msg.message.slice(2)}! TAH-DAH!`;
                 buffer.addMessage(createCommandMessage(timestamp, username, userId, color, 'c'));
                 break;
