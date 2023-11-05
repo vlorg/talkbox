@@ -597,11 +597,27 @@ class UserInputManager {
         this.initialPressDelay = 100;
         this.initialPressTimer = null;
         this.holdInterval = null;
+        this.preventScrollFlag = false;
 
         // Unified event handlers for touch and mouse events
-        this.canvas.addEventListener('touchstart', (event) => this.handleGenericStart(event));
-        this.canvas.addEventListener('touchmove', (event) => this.handleGenericDrag(event));
-        this.canvas.addEventListener('touchend', () => this.handleTouchEnd());
+        this.canvas.addEventListener('touchstart', (event) => {
+            this.preventScrollFlag = true; // Set flag to true when touch starts within the canvas
+            this.handleGenericStart(event);
+        }, {passive: false});
+
+        // TODO: Dragging on mobile is not working properly
+
+        // this.canvas.addEventListener('touchmove', (event) => {
+        //     if (this.preventScrollFlag) {
+        //         this.handleGenericDrag(event);
+        //         event.preventDefault(); // Prevent scrolling only if the flag is true
+        //     }
+        // }, {passive: false}); // Note: 'passive: false' is necessary to call 'event.preventDefault'
+
+        this.canvas.addEventListener('touchend', () => {
+            this.preventScrollFlag = false; // Reset the flag on touch end
+            this.handleTouchEnd();
+        }, {passive: true});
 
         this.canvas.addEventListener('mousedown', (event) => this.handleGenericStart(event));
         this.canvas.addEventListener('mousemove', (event) => this.handleGenericDrag(event));
@@ -611,10 +627,10 @@ class UserInputManager {
 
         // Disable browser's pull-to-refresh gesture
         document.addEventListener('touchmove', function (event) {
-            if (event.scale !== 1) {
+            if (this.canvas.contains(event.target)) {
                 event.preventDefault();
             }
-        }, {passive: false});
+        }.bind(this), {passive: false});
     }
 
     // Normalize event object for touch and mouse events
@@ -874,8 +890,8 @@ class UserInputManager {
 // INFO: Configuration
 class Config {
     static maxDistanceMultiplier = 200;
-    static maxGravityPointMass = 0;
-    static maxFriction = 0;
+    static maxGravityPointMass = 500000;
+    static maxFriction = 5;
     static maxMass = 10;
     static maxAttraction = 0;
     static maxRepulsion = 5;
