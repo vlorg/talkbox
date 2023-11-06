@@ -12,6 +12,7 @@ class UIHandler {
         this.usernameInput = document.getElementById('username');
         this.messageInput = document.getElementById('message');
         this.sendButton = document.getElementById('sendButton');
+        this.lastUserId = null;
         this.initDateTimeDisplay();
         this.initCanvasContainer();
 
@@ -211,8 +212,10 @@ class UIHandler {
         this.chatBox.appendChild(messageElement);
     }
 
-    handleSpecialCommand({command}, index, length) {
+    handleSpecialCommand({userId, command}, index, length) {
+        console.log({userId, command, index, length});
         if (command === 'b' && index === length - 1) {
+            this.lastUserId = userId;
             this.bCommandReceived = true;
             this.updateTabTitle();
             this.flashScreen();
@@ -245,48 +248,56 @@ class UIHandler {
         if (!parentDiv) return;  // Exit if the parent div is not found
 
         // Store the original background color to restore it later
-        const originalBackgroundColor = parentDiv.style.backgroundColor;
+        const originalBackgroundColor = getComputedStyle(parentDiv).backgroundColor;
 
-        // Assuming userColor is the color you want to alternate with white
-        const userColor = ColorGenerator.getColorFromUserId(this.usernameInput.value);  // JK it's actually the user's name
+        // Prepare the parent div for transition
+        parentDiv.style.transition = 'background-color 0.5s ease-in-out';
 
-        // Define the CSS for the flash animation
-        const css = `
-        @keyframes flashAnimation {
-            0% { background-color: ${userColor}; }
-            25% { background-color: black; }
-            50% { background-color: ${userColor}; }
-            75% { background-color: black; }
-            100% { background-color: ${userColor}; }
-        }
+        // Function to trigger the inner flash effect
+        const triggerInnerFlash = () => {
+            // Define the keyframe for the inner flash animation
+            const css = `
+            @keyframes innerFlashAnimation {
+                0%, 100% { box-shadow: inset 0 0 -5px ${ColorGenerator.getColorFromUserId(this.lastUserId)}; }
+                50% { box-shadow: inset 0 0 90px ${ColorGenerator.getColorFromUserId(this.lastUserId)}; }
+            }
+        
+            .innerFlash {
+                animation: innerFlashAnimation 0.125s ease-in-out 4;
+            }
+            `;
 
-        .flash {
-            animation: flashAnimation 0.5s forwards;
-        }
-    `;
+            // Insert the style into the document head
+            const styleSheet = document.createElement('style');
+            styleSheet.type = 'text/css';
+            styleSheet.innerText = css;
+            document.head.appendChild(styleSheet);
 
-        // Create a stylesheet element and append it to the head
-        const styleSheet = document.createElement('style');
-        styleSheet.innerText = css;
-        document.head.appendChild(styleSheet);
+            // Add the innerFlash class to the chatBox to start the effect
+            parentDiv.classList.add('innerFlash');
 
-        // Apply the flash class to the parent div to start the animation
-        parentDiv.classList.add('flash');
+            // Event listener to clean up after the animation
+            parentDiv.addEventListener('animationend', () => {
+                parentDiv.classList.remove('innerFlash');
+                document.head.removeChild(styleSheet);
+            });
+        };
 
-        // Define a function to handle the animationend event
-        function handleAnimationEnd() {
-            parentDiv.classList.remove('flash');
-            document.head.removeChild(styleSheet);
-            // Restore the original background color
+        // Execute the function to trigger the flash effect
+        triggerInnerFlash();
+
+
+        // Event handler for the end of the transition
+        const handleTransitionEnd = () => {
+            parentDiv.style.transition = '';
             parentDiv.style.backgroundColor = originalBackgroundColor;
+            parentDiv.removeEventListener('transitionend', handleTransitionEnd);
+        };
 
-            // Remove the animationend event listener
-            parentDiv.removeEventListener('animationend', handleAnimationEnd);
-        }
+        // Listen for the transition end to restore the original background color
+        parentDiv.addEventListener('transitionend', handleTransitionEnd);
 
-        // Add the animationend event listener
-        parentDiv.addEventListener('animationend', handleAnimationEnd);
-
+        // Uncomment the following line if the vibration feature is needed
         // this.triggerVibration();  // TODO: Check current best practices for vibration API
     }
 
