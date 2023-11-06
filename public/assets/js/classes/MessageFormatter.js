@@ -3,6 +3,7 @@ class MessageFormatter {
     static emojiMap = {
         ':)': '😊',
         ':(': '☹️',
+        ';)': '😉',
         ':D': '😄',
         'xD': '😆',
         ':P': '😛',
@@ -19,7 +20,7 @@ class MessageFormatter {
     };
 
     static convertTextToEmojis(text) {
-        const emojiRegex = /(:\)|:\(|:D|xD|:P|:O|:\||:\/|:\*|:3|:>|:<|<3|\(:)/g;
+        const emojiRegex = /(:\)|:\(|;\)|:D|xD|:P|:O|:\||:\/|:\*|:3|:>|:<|<3|\(:)/g;
         return text.replace(emojiRegex, (match) => {
             return this.emojiMap[match] || match;
         });
