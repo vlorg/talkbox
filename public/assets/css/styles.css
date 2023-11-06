@@ -92,7 +92,9 @@ a {
 }
 
 .button-group-center {
-    display: flex;
-    justify-content: center;
-    /*height: 100%; !* Adjust this as necessary for your UI *!*/
+    display: flex; /* Enable flexbox */
+    justify-content: center; /* Center the buttons horizontally */
+    align-items: center; /* Center the buttons vertically */
+    flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+    gap: 10px; /* Provide some space between buttons */
 }

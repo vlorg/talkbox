@@ -1,4 +1,6 @@
 class ArcadeLoader {
+    mobileBreakpoint = 768;
+
     constructor() {
         this.canvasContainer = document.getElementById('canvas-container');
         this.initCanvasContainer();
@@ -11,29 +13,39 @@ class ArcadeLoader {
         // Create the button group container
         const buttonGroup = this.createButtonGroup();
 
-        // Create buttons with respective titles and handlers
+        // Define games with respective titles and handlers
         const games = [
             {
                 title: 'Play Marbles',
-                handler: () => this.loadMarbles()
+                handler: () => this.loadMarbles(),
+                mobileFriendly: true
             },
             {
                 title: 'Play Chess Puzzles',
-                handler: () => this.loadIframe('https://lichess.org/training/frame?theme=metal&bg=dark&pieceSet=california', 400, 444)
+                handler: () => this.loadIframe('https://lichess.org/training/frame?theme=metal&bg=dark&pieceSet=california', 400, 444),
+                mobileFriendly: true
             },
             {
                 title: 'Play Q*bert',
-                handler: () => this.loadIframe('https://archive.org/embed/arcade_qbert', 560, 600)
+                handler: () => this.loadIframe('https://archive.org/embed/arcade_qbert', 560, 600),
+                mobileFriendly: false
             },
             {
                 title: 'Play MsPacman and Galaga',
-                handler: () => this.loadIframe('https://archive.org/embed/arcade_20pacgal', 560, 600)
+                handler: () => this.loadIframe('https://archive.org/embed/arcade_20pacgal', 560, 600),
+                mobileFriendly: false
             }
         ];
 
+        // Detect current breakpoint
+        const isMobile = window.innerWidth < this.mobileBreakpoint
+
         games.forEach(game => {
-            const button = this.createButton(game.title, game.handler);
-            buttonGroup.appendChild(button);
+            // If the game is mobile-friendly, or we're not on a mobile device, add the button
+            if (game.mobileFriendly || !isMobile) {
+                const button = this.createButton(game.title, game.handler);
+                buttonGroup.appendChild(button);
+            }
         });
 
         // Append the button group to the canvas container
