@@ -16,6 +16,10 @@ body {
     color: inherit;
 }
 
+#header {
+    color: grey;
+}
+
 #chatBox {
     height: 64vh;
     overflow-y: auto;
