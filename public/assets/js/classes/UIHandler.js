@@ -213,7 +213,7 @@ class UIHandler {
     }
 
     handleSpecialCommand({userId, command}, index, length) {
-        console.log({userId, command, index, length});
+        // console.log({userId, command, index, length});
         if (command === 'b' && index === length - 1) {
             this.lastUserId = userId;
             this.bCommandReceived = true;
@@ -271,7 +271,6 @@ class UIHandler {
 
             // Insert the style into the document head
             const styleSheet = document.createElement('style');
-            styleSheet.type = 'text/css';
             styleSheet.innerText = css;
             document.head.appendChild(styleSheet);
 
