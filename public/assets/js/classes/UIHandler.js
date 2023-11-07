@@ -244,6 +244,8 @@ class UIHandler {
     }
 
     flashScreen() {
+        const flashes = 6;  // Number of flashes
+
         const parentDiv = document.getElementById('chatBox');
         if (!parentDiv) return;  // Exit if the parent div is not found
 
@@ -263,7 +265,7 @@ class UIHandler {
             }
         
             .innerFlash {
-                animation: innerFlashAnimation 0.125s ease-in-out 4;
+                animation: innerFlashAnimation 0.125s ease-in-out ${flashes};
             }
             `;
 
