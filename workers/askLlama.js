@@ -91,6 +91,7 @@ function htmlPage(prompt = '', response = '') {
                   background-size: contain;
                   background-color: transparent;
                   background-repeat: no-repeat;
+                  opacity: 0.5;
                   border: none; 
                   width: 100px; 
                   height: 60px; 
@@ -108,7 +109,7 @@ function htmlPage(prompt = '', response = '') {
                     </div>
                 </div>
 
-                <form action="ai" method="post">
+                <form action="llama" method="post">
                     <div class="row my-3">
                         <div class="col-lg-11 col-md-10 col-9">
                             <input type="text" class="form-control" tabindex="0" id="messageInput" name="message" placeholder="Ask your question" ${prompt}">
@@ -120,30 +121,54 @@ function htmlPage(prompt = '', response = '') {
                 </form>
             </div>
             
-            <script>
-                document.addEventListener('DOMContentLoaded', (e) => {
-                    const inputField = document.getElementById('messageInput');
-                    const sendButton = document.getElementById('sendButton'); 
-                    inputField.addEventListener('input', function() {
-                        sendButton.disabled=inputField.value.trim().length<=0;
-                    });
-                    window.addEventListener('DOMContentLoaded', (e) => {
-                        const container = document.querySelector('.container');
-                        container.style.opacity = '1';
-                        container.style.transform = 'scale(1)';
-                    });
-
-                    inputField.addEventListener('keypress', (e) =>  {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            sendButton.click();
-                        }
-                    });
+             <script>
+              document.addEventListener('DOMContentLoaded', (e) => {
+                const inputField = document.getElementById('messageInput');
+                const sendButton = document.getElementById('sendButton');
+                const container = document.querySelector('.container');
+                const form = document.querySelector('form');
+                const fadeTimer = 500; // Milliseconds
                 
-                    sendButton.addEventListener('touchend', (e) =>  {
-                        sendButton.click();
-                    });
+                
+                // Function to control the fade in and fade out
+                function fade(action) {
+                  container.style.transition = 'opacity ' + fadeTimer + 'ms';
+                  container.style.opacity = action === 'in' ? '1' : '0';
+                }
+            
+                // Fade in on page load
+                fade('in');
+            
+                inputField.addEventListener('input', function() {
+                  sendButton.disabled = inputField.value.trim().length <= 0;
                 });
+            
+                inputField.addEventListener('keypress', (e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    fadeOutAndSubmit();
+                  }
+                });
+            
+                sendButton.addEventListener('click', (e) => {
+                  e.preventDefault();
+                  fadeOutAndSubmit();
+                });
+            
+                sendButton.addEventListener('touchend', (e) => {
+                  e.preventDefault(); // Prevent multiple triggers
+                });
+            
+                function fadeOutAndSubmit() {
+                  // Fade out the container
+                  fade('out');
+            
+                  // Wait for the transition to finish before submitting
+                  setTimeout(() => {
+                    form.submit();
+                  }, 500); // This should match the duration of the opacity transition
+                }
+              });
             </script>
                     
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
