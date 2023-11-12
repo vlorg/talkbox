@@ -7,25 +7,37 @@ export default {
     async fetch(request, env) {
         try {
             if (request.method === 'GET') {
-                return new Response(htmlPage(), {
+                // Check if there's a message query parameter to display the AI response
+                const url = new URL(request.url);
+                const message = url.searchParams.get('message');
+                const aiResponse = url.searchParams.get('aiResponse');
+                return new Response(htmlPage(message, aiResponse), {
                     headers: {'Content-Type': 'text/html'},
                 });
             } else if (request.method === 'POST') {
                 const formData = await request.formData();
-                const message = formData.get('message');
+                const message = formData.get('message').replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 
                 if (message.trim().length <= 0) {
-                    return new Response(htmlPage(), {
-                        headers: {'Content-Type': 'text/html'},
-                    });
+                    // Redirect back to the GET page without processing
+                    return Response.redirect(new URL(request.url), 303);
                 }
 
+                // Process the message with AI
                 const ai = new Ai(env.AI);
                 const response = await ai.run('@cf/meta/llama-2-7b-chat-int8', {prompt: message});
                 const aiResponse = processAiResponse(response.response);
-                return new Response(htmlPage(message, aiResponse), {
-                    headers: {'Content-Type': 'text/html'},
-                });
+
+                // Encode message and aiResponse in base64
+                const encodedMessage = btoa(encodeURIComponent(message));
+                const encodedAiResponse = btoa(encodeURIComponent(aiResponse));
+
+                // Use encoded values in the URL
+                const redirectUrl = new URL(request.url);
+                redirectUrl.searchParams.set('message', encodedMessage);
+                redirectUrl.searchParams.set('aiResponse', encodedAiResponse);
+                return Response.redirect(redirectUrl, 303);
+
             } else {
                 return new Response('Method not allowed', {status: 405});
             }
@@ -34,14 +46,19 @@ export default {
             return new Response(`Error: ${error.message}`, {status: 500});
         }
     }
+
 };
 
 function processAiResponse(aiResponse) {
-    const headerRegex = /^\?\n\n(Answer:)?/;
+    const headerRegex = /^(?:\?\n\n)?(Answer:)?/;
     return aiResponse.replace(headerRegex, '').trim();
 }
 
-function htmlPage(prompt = '', response = '') {
+function htmlPage(encodedPrompt = '', encodedResponse = '') {
+    // Decode base64 encoded data
+    const prompt = encodedPrompt ? decodeURIComponent(atob(encodedPrompt)) : '';
+    const response = encodedResponse ? decodeURIComponent(atob(encodedResponse)) : '';
+
     return `
         <!DOCTYPE html>
         <html lang="en">
@@ -58,12 +75,13 @@ function htmlPage(prompt = '', response = '') {
                 .container {
                     padding-top: 5px;
                     opacity: 0;
-                    transform: scale(0.9);
-                    transition: opacity 2s ease-in-out, transform 2s ease-in-out;
+                    transform: scale(0);
                 }
                 #responseText { height: 600px; }
                 .textarea-container {
                   position: relative;
+                  user-select: none;
+                  pointer-events: none;
                 }
                 .custom-textarea {
                   width: 100%;
@@ -77,7 +95,6 @@ function htmlPage(prompt = '', response = '') {
                   width: 95%; /* Make it as wide as the textarea */
                   height: 100%; /* Make it as tall as the textarea */
                   transform: translate(-50%, -50%);
-
                   background-image: url('https://rylekor.com/talkbox/assets/img/askLlamaWeb.png');
                   background-size: contain;
                   background-repeat: no-repeat;
@@ -129,13 +146,25 @@ function htmlPage(prompt = '', response = '') {
                 const form = document.querySelector('form');
                 const fadeTimer = 500; // Milliseconds
                 
+                // Adjust the opacity of .image-overlay based on aiResponse
+                const aiResponse = "` + response + `";
+                const imageOverlay = document.querySelector('.image-overlay');
+                if (aiResponse && imageOverlay) {
+                    imageOverlay.style.opacity = '0.2';
+                } else {
+                    imageOverlay.style.opacity = '1';
+                }
                 
                 // Function to control the fade in and fade out
                 function fade(action) {
-                  container.style.transition = 'opacity ' + fadeTimer + 'ms';
-                  container.style.opacity = action === 'in' ? '1' : '0';
-                }
-            
+                  const opacity = action === 'in' ? '1' : '0';
+                  const scale = action === 'in' ? '1' : '0'; 
+                  
+                  container.style.transition = 'opacity ' + fadeTimer + 'ms, transform ' + fadeTimer + 'ms'; 
+                  container.style.opacity = opacity;
+                  container.style.transform = 'scale(' + scale + ')';
+}
+
                 // Fade in on page load
                 fade('in');
             
@@ -152,21 +181,22 @@ function htmlPage(prompt = '', response = '') {
             
                 sendButton.addEventListener('click', (e) => {
                   e.preventDefault();
+                  if(inputField.value.trim().length <= 0) return;
                   fadeOutAndSubmit();
                 });
             
                 sendButton.addEventListener('touchend', (e) => {
-                  e.preventDefault(); // Prevent multiple triggers
+                  e.preventDefault();
+                  sendButton.click();
                 });
             
                 function fadeOutAndSubmit() {
-                  // Fade out the container
+                  document.activeElement.blur();
                   fade('out');
             
-                  // Wait for the transition to finish before submitting
                   setTimeout(() => {
                     form.submit();
-                  }, 500); // This should match the duration of the opacity transition
+                  }, fadeTimer);
                 }
               });
             </script>
