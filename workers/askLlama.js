@@ -116,13 +116,13 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
                   pointer-events: none; /* Make it unclickable, so the textarea stays interactive */
                 }
                 button.custom-button {
-                  background-image: url('https://rylekor.com/talkbox/assets/img/askLlamaButtonWeb.png');
+                  background-image: url('https://rylekor.com/talkbox/assets/img/askButton.png');
                   background-size: contain;
                   background-color: transparent;
                   background-repeat: no-repeat;
                   opacity: 0.5;
                   border: none; 
-                  width: 100px; 
+                  width: 90px; 
                   height: 60px; 
                   cursor: pointer; /* Change the cursor to signify this is clickable */
                 }
@@ -139,7 +139,7 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
                 </div>
 
                 <form action="llama" method="post">
-                    <div class="row my-3">
+                    <div class="row d-flex align-items-center my-3">
                         <div class="col-lg-11 col-md-10 col-9">
                             <input type="text" class="form-control" tabindex="0" id="messageInput" name="message" placeholder="Ask your question" ${prompt}">
                         </div>
@@ -163,12 +163,20 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
                     const imageOverlay = document.querySelector('.image-overlay');
                     
                     // Set background-image random image from array
-                    const images = ['askLlamaWeb.png', 'soulLlamaWeb.png'];
+                    const images = [
+                        'askLlamaWeb.png', 
+                        'soulLlamaWeb.png',
+                        'cloudLlamaWeb.png',
+                        'greyLlamaWeb.png',
+                        'soulLlamaWeb.png',
+                        'spaceLlamaWeb.png',
+                        'stormLlamaWeb.png',
+                        ];
                     const randomImage = images[Math.floor(Math.random() * images.length)];
                     imageOverlay.style.backgroundImage = "url('https://rylekor.com/talkbox/assets/img/" + randomImage + "')";
                 
                     if (aiResponse !== "0" && imageOverlay) {
-                        imageOverlay.style.opacity = '0.2';
+                        imageOverlay.style.opacity = '0.3';
                     } else {
                         imageOverlay.style.opacity = '1';
                     }
