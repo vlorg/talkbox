@@ -16,7 +16,7 @@ export default {
                 });
             } else if (request.method === 'POST') {
                 const formData = await request.formData();
-                const message = formData.get('message').replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+                const message = sanitizeString(formData.get('message').trim());
 
                 if (message.trim().length <= 0) {
                     // Redirect back to the GET page without processing
@@ -26,7 +26,7 @@ export default {
                 // Process the message with AI
                 const ai = new Ai(env.AI);
                 const response = await ai.run('@cf/meta/llama-2-7b-chat-int8', {prompt: message});
-                const aiResponse = processAiResponse(response.response);
+                const aiResponse = sanitizeString(processAiResponse(response.response));
 
                 // Encode message and aiResponse in base64
                 const encodedMessage = btoa(encodeURIComponent(message));
@@ -49,6 +49,14 @@ export default {
 
 };
 
+function sanitizeString(str) {
+    return str.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function processAiResponse(aiResponse) {
     const headerRegex = /^(?:\?\n\n)?(Answer:)?/;
     return aiResponse.replace(headerRegex, '').trim();
@@ -58,6 +66,7 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
     // Decode base64 encoded data
     const prompt = encodedPrompt ? decodeURIComponent(atob(encodedPrompt)) : '';
     const response = encodedResponse ? decodeURIComponent(atob(encodedResponse)) : '';
+    const responseLength = response.length;
 
     return `
         <!DOCTYPE html>
@@ -65,9 +74,9 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
             <title>Ask Llama</title>
-            <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+            <link rel="icon" href="https://rylekor.com/talkbox/assets/img/rylekor.png">
             <style>
                 body, input, textarea, .form-control { background-color: black; color: white;}
                 input:focus, textarea:focus, .form-control:focus { background-color: black; color: white; }
@@ -147,9 +156,10 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
                 const fadeTimer = 500; // Milliseconds
                 
                 // Adjust the opacity of .image-overlay based on aiResponse
-                const aiResponse = "` + response + `";
+                const aiResponse = "` + responseLength + `";
                 const imageOverlay = document.querySelector('.image-overlay');
-                if (aiResponse && imageOverlay) {
+                
+                if (aiResponse !== "0" && imageOverlay) {
                     imageOverlay.style.opacity = '0.2';
                 } else {
                     imageOverlay.style.opacity = '1';
@@ -201,7 +211,7 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
               });
             </script>
                     
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
         </body>
         </html>
   `;
