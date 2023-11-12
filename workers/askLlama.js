@@ -16,17 +16,21 @@ export default {
                 });
             } else if (request.method === 'POST') {
                 const formData = await request.formData();
-                const message = sanitizeString(formData.get('message').trim());
+                let message = sanitizeString(formData.get('message').trim());
+
+                // Prefix the prompt with its identity.
+                const prePrompt = "Your name is 'The Llama' and you are wise beyond your years. Answer me this question: ";
+                message = prePrompt + message;
 
                 if (message.trim().length <= 0) {
                     // Redirect back to the GET page without processing
-                    return Response.redirect(new URL(request.url), 303);
+                    return Response.redirect(new URL(request.url).toString(), 303);
                 }
 
                 // Process the message with AI
                 const ai = new Ai(env.AI);
                 const response = await ai.run('@cf/meta/llama-2-7b-chat-int8', {prompt: message});
-                const aiResponse = sanitizeString(processAiResponse(response.response));
+                const aiResponse = sanitizeString(processAiResponse(response.response)) + ' ...';
 
                 // Encode message and aiResponse in base64
                 const encodedMessage = btoa(encodeURIComponent(message));
@@ -36,7 +40,7 @@ export default {
                 const redirectUrl = new URL(request.url);
                 redirectUrl.searchParams.set('message', encodedMessage);
                 redirectUrl.searchParams.set('aiResponse', encodedAiResponse);
-                return Response.redirect(redirectUrl, 303);
+                return Response.redirect(redirectUrl.toString(), 303);
 
             } else {
                 return new Response('Method not allowed', {status: 405});
@@ -84,7 +88,7 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
                 .container {
                     padding-top: 5px;
                     opacity: 0;
-                    transform: scale(0);
+                    transform: scale(0.5);
                 }
                 #responseText { height: 600px; }
                 .textarea-container {
@@ -104,7 +108,6 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
                   width: 95%; /* Make it as wide as the textarea */
                   height: 100%; /* Make it as tall as the textarea */
                   transform: translate(-50%, -50%);
-                  background-image: url('https://rylekor.com/talkbox/assets/img/askLlamaWeb.png');
                   background-size: contain;
                   background-repeat: no-repeat;
                   background-position: center;
@@ -148,67 +151,71 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
             </div>
             
              <script>
-              document.addEventListener('DOMContentLoaded', (e) => {
-                const inputField = document.getElementById('messageInput');
-                const sendButton = document.getElementById('sendButton');
-                const container = document.querySelector('.container');
-                const form = document.querySelector('form');
-                const fadeTimer = 500; // Milliseconds
+                document.addEventListener('DOMContentLoaded', (e) => {
+                    const inputField = document.getElementById('messageInput');
+                    const sendButton = document.getElementById('sendButton');
+                    const container = document.querySelector('.container');
+                    const form = document.querySelector('form');
+                    const fadeTimer = 500; // Milliseconds
                 
-                // Adjust the opacity of .image-overlay based on aiResponse
-                const aiResponse = "` + responseLength + `";
-                const imageOverlay = document.querySelector('.image-overlay');
+                    // Adjust the opacity of .image-overlay based on aiResponse
+                    const aiResponse = "` + responseLength + `";
+                    const imageOverlay = document.querySelector('.image-overlay');
+                    
+                    // Set background-image random image from array
+                    const images = ['askLlamaWeb.png', 'soulLlamaWeb.png'];
+                    const randomImage = images[Math.floor(Math.random() * images.length)];
+                    imageOverlay.style.backgroundImage = "url('https://rylekor.com/talkbox/assets/img/" + randomImage + "')";
                 
-                if (aiResponse !== "0" && imageOverlay) {
-                    imageOverlay.style.opacity = '0.2';
-                } else {
-                    imageOverlay.style.opacity = '1';
-                }
+                    if (aiResponse !== "0" && imageOverlay) {
+                        imageOverlay.style.opacity = '0.2';
+                    } else {
+                        imageOverlay.style.opacity = '1';
+                    }
                 
-                // Function to control the fade in and fade out
-                function fade(action) {
-                  const opacity = action === 'in' ? '1' : '0';
-                  const scale = action === 'in' ? '1' : '0'; 
-                  
-                  container.style.transition = 'opacity ' + fadeTimer + 'ms, transform ' + fadeTimer + 'ms'; 
-                  container.style.opacity = opacity;
-                  container.style.transform = 'scale(' + scale + ')';
-}
+                    // Function to control the fade in and fade out
+                    async function fade(action) {
+                        const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-                // Fade in on page load
-                fade('in');
-            
-                inputField.addEventListener('input', function() {
-                  sendButton.disabled = inputField.value.trim().length <= 0;
+                        const opacity = action === 'in' ? '1' : '0';
+                        const scale = action === 'in' ? '1' : '0.5';
+                
+                        container.style.transition = 'opacity ' + fadeTimer + 'ms ease-in-out, transform ' + fadeTimer + 'ms';
+                        container.style.opacity = opacity;
+                        container.style.transform = 'scale(' + scale + ')';
+                        
+                        await wait(fadeTimer);
+                    }
+                
+                    async function fadeOutAndSubmit() {
+                        document.activeElement.blur();
+                        await fade('out');
+                        form.submit();
+                    }
+
+                    // Fade in on page load
+                    fade('in');
+                
+                    inputField.addEventListener('input', function () {
+                        sendButton.disabled = inputField.value.trim().length <= 0;
+                    });
+                
+                    inputField.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            sendButton.click();
+                        }
+                    });
+                
+                    sendButton.addEventListener('touchend', (e) => {
+                        sendButton.click();
+                    });
+                
+                    sendButton.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        if (inputField.value.trim().length <= 0) return;
+                        await fadeOutAndSubmit();
+                    });
                 });
-            
-                inputField.addEventListener('keypress', (e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    fadeOutAndSubmit();
-                  }
-                });
-            
-                sendButton.addEventListener('click', (e) => {
-                  e.preventDefault();
-                  if(inputField.value.trim().length <= 0) return;
-                  fadeOutAndSubmit();
-                });
-            
-                sendButton.addEventListener('touchend', (e) => {
-                  e.preventDefault();
-                  sendButton.click();
-                });
-            
-                function fadeOutAndSubmit() {
-                  document.activeElement.blur();
-                  fade('out');
-            
-                  setTimeout(() => {
-                    form.submit();
-                  }, fadeTimer);
-                }
-              });
             </script>
                     
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
