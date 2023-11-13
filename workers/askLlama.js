@@ -120,7 +120,7 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
                   background-size: contain;
                   background-color: transparent;
                   background-repeat: no-repeat;
-                  opacity: 0.5;
+                  opacity: 0.9;
                   border: none; 
                   width: 90px; 
                   height: 60px; 
@@ -131,6 +131,7 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
         <body>
             
             <div class="container">
+            
                 <div class="row my-3">
                     <div class="col-lg-12 textarea-container">
                         <textarea class="form-control custom-textarea" tabindex="-1" id="responseText" readonly>${response}</textarea>
@@ -140,14 +141,15 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
 
                 <form action="llama" method="post">
                     <div class="row d-flex align-items-center my-3">
-                        <div class="col-lg-11 col-md-10 col-9">
+                        <div class="col-lg-10 col-md-10 col-9">
                             <input type="text" class="form-control" tabindex="0" id="messageInput" name="message" placeholder="Ask your question" ${prompt}">
                         </div>
-                        <div class="col-lg-1 col-md-2 col-3">
+                        <div class="col-lg-2 col-md-2 col-3 d-flex justify-content-end">
                             <button tabindex="1" id="sendButton" type="submit" class="custom-button"></button>
                         </div>
                     </div>
                 </form>
+                
             </div>
             
              <script>
