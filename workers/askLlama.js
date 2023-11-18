@@ -19,7 +19,7 @@ export default {
                 let message = sanitizeString(formData.get('message').trim());
 
                 // Prefix the prompt with its identity.
-                const prePrompt = "Your name is 'The Llama' and you are wise beyond your years. Answer me this question: ";
+                const prePrompt = "Your name is 'The Llama' and you are wise and ancient. Answer me this question: ";
                 message = prePrompt + message;
 
                 if (message.trim().length <= 0) {
@@ -196,10 +196,25 @@ function htmlPage(encodedPrompt = '', encodedResponse = '') {
                         
                         await wait(fadeTimer);
                     }
+                                    
+                    async function pulseAnimation() {
+                        const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
                 
+                        // Initial scale
+                        container.style.transition = 'transform ' + fadeTimer + 'ms ease-in-out';
+                        container.style.transform = 'scale(1.05)';
+                
+                        await wait(fadeTimer);
+
+                        await fade('out'); 
+                        container.style.transform = 'scale(1)';
+                
+                        await wait(fadeTimer);
+                    }
+                 
                     async function fadeOutAndSubmit() {
                         document.activeElement.blur();
-                        await fade('out');
+                        await pulseAnimation();
                         form.submit();
                     }
 
