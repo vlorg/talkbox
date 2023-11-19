@@ -17,7 +17,7 @@ class ArcadeLoader {
         const games = [
             {
                 title: 'Ask Llama',
-                handler: () => this.loadIframe('https://rylekor.com/llama', 560, 768),
+                handler: () => this.loadIframe('https://rylekor.com/llama', 560, 900),
                 mobileFriendly: true
             },
             {
@@ -99,6 +99,7 @@ class ArcadeLoader {
         iframe.style.width = '100%';
         iframe.style.maxWidth = `${width}px`;
         iframe.style.height = `${height}px`;
+        iframe.style.overflow = 'hidden';
         iframe.setAttribute('frameborder', '0');
         iframe.setAttribute('allowfullscreen', 'true');
         iframe.setAttribute('allowtransparency', 'true');
