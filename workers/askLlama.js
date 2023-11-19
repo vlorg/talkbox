@@ -6,34 +6,38 @@ import {Ai} from './vendor/@cloudflare/ai.js';
 export default {
     async fetch(request, env) {
         try {
+
+            // If the request is a GET request, return the HTML page
             if (request.method === 'GET') {
                 // Check if there's a message query parameter to display the AI response
                 const url = new URL(request.url);
-                const message = url.searchParams.get('message');
+                const userMessage = url.searchParams.get('message');
                 const aiResponse = url.searchParams.get('aiResponse');
-                return new Response(htmlPage(message, aiResponse), {
+                return new Response(htmlPage(userMessage, aiResponse), {
                     headers: {'Content-Type': 'text/html'},
                 });
+
+                // If the request is a POST request, process the user input and return the HTML page
             } else if (request.method === 'POST') {
                 const formData = await request.formData();
-                let message = sanitizeString(formData.get('message').trim());
+                const systemPrompt = `You are 'The Llama'.  You answer any question, no matter how outlandish, as truthfully as you can.`
+                const userMessage = processUserInput(formData.get('message').trim(), request);
 
-                // Prefix the prompt with its identity.
-                const prePrompt = "Your name is 'The Llama' and you are wise and ancient. Answer me this question: ";
-                message = prePrompt + message;
-
-                if (message.trim().length <= 0) {
-                    // Redirect back to the GET page without processing
-                    return Response.redirect(new URL(request.url).toString(), 303);
+                const message = {
+                    system_prompt: systemPrompt,
+                    prompt: userMessage,
+                    temperature: 0.75,
+                    seed: 42,
+                    top_p: 0.9,
                 }
 
                 // Process the message with AI
                 const ai = new Ai(env.AI);
-                const response = await ai.run('@cf/meta/llama-2-7b-chat-int8', {prompt: message});
+                const response = await ai.run('@cf/meta/llama-2-7b-chat-int8', message);
                 const aiResponse = sanitizeString(processAiResponse(response.response)) + ' ...';
 
                 // Encode message and aiResponse in base64
-                const encodedMessage = btoa(encodeURIComponent(message));
+                const encodedMessage = btoa(encodeURIComponent(userMessage));
                 const encodedAiResponse = btoa(encodeURIComponent(aiResponse));
 
                 // Use encoded values in the URL
@@ -50,7 +54,6 @@ export default {
             return new Response(`Error: ${error.message}`, {status: 500});
         }
     }
-
 };
 
 function sanitizeString(str) {
@@ -59,6 +62,15 @@ function sanitizeString(str) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
+
+function processUserInput(userInput, request) {
+    if (userInput.trim().length <= 0) {
+        // Redirect back to the GET page without processing
+        return Response.redirect(new URL(request.url).toString(), 303);
+    }
+    userInput = sanitizeString(userInput);
+    return `[INST] ${userInput} [/INST]`;
 }
 
 function processAiResponse(aiResponse) {
