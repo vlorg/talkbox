@@ -16,6 +16,11 @@ class ArcadeLoader {
         // Define games with respective titles and handlers
         const games = [
             {
+                title: 'Ask Llama',
+                handler: () => this.loadIframe('https://rylekor.com/llama', 560, 768),
+                mobileFriendly: true
+            },
+            {
                 title: 'Play Marbles',
                 handler: () => this.loadMarbles(),
                 mobileFriendly: true
