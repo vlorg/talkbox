@@ -17,7 +17,7 @@ class ArcadeLoader {
         const games = [
             {
                 title: 'Ask Llama',
-                handler: () => this.loadIframe('https://rylekor.com/llama', 560, 900),
+                handler: () => this.loadIframe('https://rylekor.com/llama', 560, 800),
                 mobileFriendly: true
             },
             {
