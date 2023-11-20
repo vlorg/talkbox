@@ -21,23 +21,48 @@ class ArcadeLoader {
                 mobileFriendly: true
             },
             {
-                title: 'Play Marbles',
+                title: 'Marbles',
                 handler: () => this.loadMarbles(),
                 mobileFriendly: true
             },
             {
-                title: 'Play Chess Puzzles',
-                handler: () => this.loadIframe('https://lichess.org/training/frame?theme=metal&bg=dark&pieceSet=california', 400, 444),
+                title: 'Tetris',
+                handler: () => this.loadIframe('https://rylekor.com/tetris', 560, 800),
                 mobileFriendly: true
             },
             {
-                title: 'Play Q*bert',
-                handler: () => this.loadIframe('https://archive.org/embed/arcade_qbert', 560, 600),
+                title: 'Chess Puzzles',
+                handler: () => this.loadIframe('https://lichess.org/training/frame?theme=metal&bg=dark&pieceSet=california', 400, 800),
+                mobileFriendly: true
+            },
+            {
+                title: 'Super Q*bert',
+                handler: () => this.loadIframe('https://archive.org/embed/arcade_sqbert', 560, 800),
                 mobileFriendly: false
             },
             {
-                title: 'Play MsPacman and Galaga',
-                handler: () => this.loadIframe('https://archive.org/embed/arcade_20pacgal', 560, 600),
+                title: 'Q*bert',
+                handler: () => this.loadIframe('https://archive.org/embed/arcade_qbert', 560, 800),
+                mobileFriendly: false
+            },
+            {
+                title: 'Mr. Do!',
+                handler: () => this.loadIframe('https://archive.org/embed/arcade_mrdo', 560, 800),
+                mobileFriendly: false
+            },
+            {
+                title: 'Mappy',
+                handler: () => this.loadIframe('https://archive.org/embed/mappy_mame', 560, 800),
+                mobileFriendly: false
+            },
+            {
+                title: 'MsPacman and Galaga',
+                handler: () => this.loadIframe('https://archive.org/embed/arcade_20pacgal', 560, 800),
+                mobileFriendly: false
+            },
+            {
+                title: 'Super Pinball Action',
+                handler: () => this.loadIframe('https://archive.org/embed/arcade_spbactn', 450, 800),
                 mobileFriendly: false
             }
         ];
