@@ -206,10 +206,12 @@ class ButtonManager {
 class CanvasManager {
     canvas;
     buttonAreaHeight;
+    buttonAreaHeightRatio;
 
-    constructor(canvasId, containerId) {
+    constructor(canvasId, containerId, buttonAreaHeightRatio = 0.08) { // 0.08 is reserved for buttons
         this.canvas = document.getElementById(canvasId);
         this.canvasContainer = document.getElementById(containerId);
+        this.buttonAreaHeightRatio = buttonAreaHeightRatio;
         this.resizeCanvas();
         window.addEventListener('resize', this.debounce(() => this.resizeCanvas(), 100));
     }
@@ -225,7 +227,7 @@ class CanvasManager {
     resizeCanvas() {
         this.canvas.width = this.canvasContainer.clientWidth;
         this.canvas.height = this.canvasContainer.clientHeight;
-        this.buttonAreaHeight = this.canvas.height * 0.08; // 8% of total canvas height
+        this.buttonAreaHeight = this.canvas.height * this.buttonAreaHeightRatio;
     }
 
     getButtonAreaHeight() {
